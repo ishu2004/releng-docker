@@ -1,6 +1,6 @@
 # OpenDaylight Builder Docker Image
 
-This Docker image is designed for building OpenDaylight projects. It provides a pre-configured environment for Maven (MVN) builds on both Ubuntu and CentOS bases.
+The provided Dockerfile is intended for building OpenDaylight projects. It sets up an environment with the necessary dependencies, including Java and Maven, to build OpenDaylight projects from source code. You can use this Docker image to build the OpenDaylight projects
 
 ## Building the Docker Image
 
@@ -39,9 +39,4 @@ $ cd distribution
 mvn clean install
 ```
 This will initiate the build process for the OpenDaylight project. Make sure you replace the example Git URL (https://git.opendaylight.org/gerrit/integration/distribution) with the URL of the specific OpenDaylight repository you intend to build.
-
 By following these steps, you can use the provided Docker image to build OpenDaylight projects with a consistent development environment.
-
-
-
-
