@@ -20,14 +20,14 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: Builder/Ubuntu/
-          tags: ${{ vars.ROBOT_IMAGE }}:latest  
-          outputs: type=docker,dest=/tmp/${{ vars.ROBOT_IMAGE }}.tar
+          tags: ${{ vars.BASE_IMAGE }}:latest  
+          outputs: type=docker,dest=/tmp/${{ vars.BASE_IMAGE }}.tar
       -
         name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ vars.ROBOT_IMAGE }}   
-          path: /tmp/${{ vars.ROBOT_IMAGE }}.tar
+          name: ${{ vars.BASE_IMAGE }}   
+          path: /tmp/${{ vars.BASE_IMAGE }}.tar
 
 
   aaa:
@@ -41,15 +41,15 @@ jobs:
         name: Download artifact
         uses: actions/download-artifact@v3
         with:
-          name: ${{ vars.ROBOT_IMAGE }}
+          name: ${{ vars.BASE_IMAGE }}
           path: /tmp
       -
         name: Load image
         run: |
-          docker load --input /tmp/${{ vars.ROBOT_IMAGE }}.tar
+          docker load --input /tmp/${{ vars.BASE_IMAGE }}.tar
       - name: Maven Build 
         run: |
-         docker run ${{ vars.ROBOT_IMAGE }}:latest bash -c 'git clone "https://github.com/opendaylight/aaa.git" && cd /aaa && mvn clean install'
+         docker run ${{ vars.BASE_IMAGE }}:latest bash -c 'git clone "https://github.com/opendaylight/aaa.git" && cd /aaa && mvn clean install'
     
   yangtools:
     runs-on: ubuntu-latest
@@ -62,14 +62,14 @@ jobs:
         name: Download artifact
         uses: actions/download-artifact@v3
         with:
-          name: ${{ vars.ROBOT_IMAGE }}
+          name: ${{ vars.BASE_IMAGE }}
           path: /tmp
       -
         name: Load image
         run: |
-          docker load --input /tmp/${{ vars.ROBOT_IMAGE }}.tar
+          docker load --input /tmp/${{ vars.BASE_IMAGE }}.tar
       - name: Maven Build 
-        run: docker run ${{ vars.ROBOT_IMAGE }}:latest bash -c 'git clone "https://github.com/opendaylight/yangtools.git" && cd /yangtools && mvn clean install'  
+        run: docker run ${{ vars.BASE_IMAGE }}:latest bash -c 'git clone "https://github.com/opendaylight/yangtools.git" && cd /yangtools && mvn clean install'  
             
   Integration-distribution:
     runs-on: ubuntu-latest
@@ -82,14 +82,14 @@ jobs:
         name: Download artifact
         uses: actions/download-artifact@v3
         with:
-          name: ${{ vars.ROBOT_IMAGE }}
+          name: ${{ vars.BASE_IMAGE }}
           path: /tmp
       -
         name: Load image
         run: |
-          docker load --input /tmp/${{ vars.ROBOT_IMAGE }}.tar
+          docker load --input /tmp/${{ vars.BASE_IMAGE }}.tar
       - name: Maven Build 
-        run: docker run ${{ vars.ROBOT_IMAGE }}:latest bash -c 'git clone "https://git.opendaylight.org/gerrit/integration/distribution" && cd /distribution && mvn clean install'  
+        run: docker run ${{ vars.BASE_IMAGE }}:latest bash -c 'git clone "https://git.opendaylight.org/gerrit/integration/distribution" && cd /distribution && mvn clean install'  
   
   Serviceutils:
     runs-on: ubuntu-latest
@@ -102,15 +102,15 @@ jobs:
         name: Download artifact
         uses: actions/download-artifact@v3
         with:
-          name: ${{ vars.ROBOT_IMAGE }}
+          name: ${{ vars.BASE_IMAGE }}
           path: /tmp
       -
         name: Load image
         run: |
-          docker load --input /tmp/${{ vars.ROBOT_IMAGE }}.tar
+          docker load --input /tmp/${{ vars.BASE_IMAGE }}.tar
   
       - name: Maven Build 
-        run: docker run ${{ vars.ROBOT_IMAGE }}:latest bash -c 'git clone "https://github.com/opendaylight/serviceutils.git" && cd /serviceutils && mvn clean install'  
+        run: docker run ${{ vars.BASE_IMAGE }}:latest bash -c 'git clone "https://github.com/opendaylight/serviceutils.git" && cd /serviceutils && mvn clean install'  
 
   odlparent:
     runs-on: ubuntu-latest
@@ -123,15 +123,15 @@ jobs:
         name: Download artifact
         uses: actions/download-artifact@v3
         with:
-          name: ${{ vars.ROBOT_IMAGE }}
+          name: ${{ vars.BASE_IMAGE }}
           path: /tmp
       -
         name: Load image
         run: |
-          docker load --input /tmp/${{ vars.ROBOT_IMAGE }}.tar
+          docker load --input /tmp/${{ vars.BASE_IMAGE }}.tar
       - name: Maven Build 
         run: |
-         docker run ${{ vars.ROBOT_IMAGE }}:latest bash -c 'git clone "https://github.com/opendaylight/odlparent.git" && cd /odlparent && mvn clean install'  
+         docker run ${{ vars.BASE_IMAGE }}:latest bash -c 'git clone "https://github.com/opendaylight/odlparent.git" && cd /odlparent && mvn clean install'  
   
   Openflowplugin:
     runs-on: ubuntu-latest
@@ -144,15 +144,15 @@ jobs:
         name: Download artifact
         uses: actions/download-artifact@v3
         with:
-          name: ${{ vars.ROBOT_IMAGE }}
+          name: ${{ vars.BASE_IMAGE }}
           path: /tmp
       -
         name: Load image
         run: |
-          docker load --input /tmp/${{ vars.ROBOT_IMAGE }}.tar
+          docker load --input /tmp/${{ vars.BASE_IMAGE }}.tar
       - name: Maven Build 
         run: |
-         docker run ${{ vars.ROBOT_IMAGE }}:latest bash -c 'git clone "https://github.com/opendaylight/openflowplugin.git" && cd /openflowplugin && mvn clean install'  
+         docker run ${{ vars.BASE_IMAGE }}:latest bash -c 'git clone "https://github.com/opendaylight/openflowplugin.git" && cd /openflowplugin && mvn clean install'  
          
   Ovsdb:
     runs-on: ubuntu-latest
@@ -165,12 +165,12 @@ jobs:
         name: Download artifact
         uses: actions/download-artifact@v3
         with:
-          name: ${{ vars.ROBOT_IMAGE }}
+          name: ${{ vars.BASE_IMAGE }}
           path: /tmp
       -
         name: Load image
         run: |
-          docker load --input /tmp/${{ vars.ROBOT_IMAGE }}.tar
+          docker load --input /tmp/${{ vars.BASE_IMAGE }}.tar
       - name: Maven Build 
         run: |
-         docker run ${{ vars.ROBOT_IMAGE }}:latest bash -c 'git clone "https://github.com/opendaylight/ovsdb.git" && cd /ovsdb && mvn clean install'  
+         docker run ${{ vars.BASE_IMAGE }}:latest bash -c 'git clone "https://github.com/opendaylight/ovsdb.git" && cd /ovsdb && mvn clean install'  
