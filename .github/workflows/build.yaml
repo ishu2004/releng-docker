@@ -4,30 +4,39 @@ on:
   push:
     branches:
       - '*'
+  workflow_dispatch:
+    inputs:
+      OS_FLAVOR:
+        description: "Linux Flavor"
+        required: false
+        type: string
+        default: ubuntu
+
 
 jobs:
-  Builder-Docker-Images:
+  builder-docker-image:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Build Docker image
-        run: docker build -t ${{ vars.REPOSITORY }}/${{ vars.IMAGENAME1 }}  Builder/Ubuntu/
+      - name: Build Ubuntu Docker image
+        run: docker build -t ${{ vars.DOCKER_REPOSITORY }}/${{ vars.ODL_BASE_IMAGE_NAME }}  builder/${{ vars.OS_FLAVOR }}
 
-      - name: Test 
+      - name: Clone and test repo
         run: |
-          docker run ${{ vars.REPOSITORY }}/${{ vars.IMAGENAME1 }} \
+          docker run ${{ vars.DOCKER_REPOSITORY }}/${{ vars.ODL_BASE_IMAGE_NAME }} \
           bash -c 'git clone "https://git.opendaylight.org/gerrit/integration/distribution" && \
                    cd /distribution && mvn clean install'
-      - name: Log in to Docker Hub
+
+      - name: Authenticate to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Push Docker image
-        run: docker push ${{ vars.REPOSITORY }}/${{ vars.IMAGENAME1 }}
+        run: docker push ${{ vars.DOCKER_REPOSITORY }}/${{ vars.ODL_BASE_IMAGE_NAME }}
 
   Build-And-Test-Robot-Docker-Image:
     runs-on: ubuntu-latest
@@ -44,15 +53,15 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Build Docker image
-        run: docker build -t ${{ vars.REPOSITORY }}/${{ vars.IMAGENAME2 }} Robot/
+        run: docker build -t ${{ vars.DOCKER_REPOSITORY }}/${{ vars.ROBOT_BASE_IMAGE_NAME }} robot/
 
       - name: Test
         run: |
-          docker run --network container:odl-container ${{ vars.REPOSITORY }}/${{ vars.IMAGENAME2 }} bash -c '
-            yum install -y git python3-pip &&        
-            pip3 install robotframework robotframework-extendedrequestslibrary &&  
-            git clone https://github.com/opendaylight/integration-test.git &&       
-            cd integration-test/csit/suites/integration/basic && 
+          docker run --network container:odl-container ${{ vars.DOCKER_REPOSITORY }}/${{ vars.ROBOT_BASE_IMAGE_NAME }} bash -c '
+            yum install -y git python3-pip &&
+            pip3 install robotframework robotframework-extendedrequestslibrary &&
+            git clone https://github.com/opendaylight/integration-test.git &&
+            cd integration-test/csit/suites/integration/basic &&
             robot -L debug \
                   --variable USER_HOME:/home/centos \
                   --variable DEFAULT_LINUX_PROMPT:\$ \
@@ -64,6 +73,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
+
       - name: Push Docker image
-        run: docker push ${{ vars.REPOSITORY }}/${{ vars.IMAGENAME2 }}
+        run: docker push ${{ vars.DOCKER_REPOSITORY }}/${{ vars.ROBOT_BASE_IMAGE_NAME }}

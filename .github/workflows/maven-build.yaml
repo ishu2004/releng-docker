@@ -16,7 +16,7 @@ jobs:
       - name: Build and export
         uses: docker/build-push-action@v4
         with:
-          context: Builder/Ubuntu/
+          context: builder/ubuntu/
           tags: ${{ vars.ODL_BASE_IMAGE_NAME }}:latest
           outputs: type=docker,dest=/tmp/${{ vars.ODL_BASE_IMAGE_NAME }}.tar
       - name: Upload artifact
