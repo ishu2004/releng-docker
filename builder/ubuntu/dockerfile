@@ -11,7 +11,7 @@ RUN apt-get install openjdk-17-jdk openjdk-17-jre -y
 # Download and install Maven 3.8
 RUN wget -q https://downloads.apache.org/maven/maven-3/3.8.8/binaries/apache-maven-3.8.8-bin.tar.gz && \
     tar -xf apache-maven-3.8.8-bin.tar.gz -C /opt && \
-    rm apache-maven-3.8.8-bin.tar.gz 
+    rm apache-maven-3.8.8-bin.tar.gz
 
 # Set environment variables
 ENV MAVEN_HOME=/opt/apache-maven-3.8.8

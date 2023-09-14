@@ -1,4 +1,5 @@
-name: Build and Run Docker Image
+---
+name: Build Ubuntu/CentOS Docker Image and Push them to Docker registry
 
 on:
   push:
@@ -8,10 +9,12 @@ on:
     inputs:
       OS_FLAVOR:
         description: "Linux Flavor"
-        required: false
+        required: true
         type: string
         default: ubuntu
 
+env:
+  DOCKER_REGISTRY: "ghcr.io"
 
 jobs:
   builder-docker-image:
@@ -21,13 +24,15 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Build Ubuntu Docker image
-        run: docker build -t ${{ vars.DOCKER_REPOSITORY }}/${{ vars.ODL_BASE_IMAGE_NAME }}  builder/${{ vars.OS_FLAVOR }}
+        # yamllint disable-line rule:line-length
+        run: docker build -t ${{ vars.DOCKER_REPOSITORY }}/${{ vars.ODL_BASE_IMAGE_NAME }} builder/ubuntu
 
-      - name: Clone and test repo
-        run: |
-          docker run ${{ vars.DOCKER_REPOSITORY }}/${{ vars.ODL_BASE_IMAGE_NAME }} \
-          bash -c 'git clone "https://git.opendaylight.org/gerrit/integration/distribution" && \
-                   cd /distribution && mvn clean install'
+      # - name: Clone and test int-dist repo
+      #   # yamllint disable-line rule:line-length
+      #   run: |
+      #     docker run ${{ vars.DOCKER_REPOSITORY }}/${{ vars.ODL_BASE_IMAGE_NAME }} \
+      #     bash -c 'git clone "https://git.opendaylight.org/gerrit/integration/distribution" && \
+      #              cd /distribution && mvn clean install'
 
       - name: Authenticate to Docker Hub
         uses: docker/login-action@v2
@@ -36,7 +41,22 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Push Docker image
+        # yamllint disable-line rule:line-length
         run: docker push ${{ vars.DOCKER_REPOSITORY }}/${{ vars.ODL_BASE_IMAGE_NAME }}
+
+      - name: Authenticate to GHCR
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build the Docker image and push to GHCR
+        # yamllint disable-line rule:line-length
+        run: |
+          docker build --tag ${{ env.DOCKER_REGISTRY }}/${{ vars.DOCKER_REPOSITORY }}/${{ vars.ODL_BASE_IMAGE_NAME }}:latest builder/ubuntu
+          docker run ${{ env.DOCKER_REGISTRY }}/${{ vars.DOCKER_REPOSITORY }}/${{ vars.ODL_BASE_IMAGE_NAME }}:latest
+          docker push ${{ env.DOCKER_REGISTRY }}/${{ vars.DOCKER_REPOSITORY }}/${{ vars.ODL_BASE_IMAGE_NAME }}:latest
 
   Build-And-Test-Robot-Docker-Image:
     runs-on: ubuntu-latest
@@ -68,6 +88,7 @@ jobs:
                   --variable ODL_SYSTEM_IP:opendaylight \
                   --variable ODL_SYSTEM_USER:centos \
                   ./restconf_modules.robot'
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
@@ -76,3 +97,16 @@ jobs:
 
       - name: Push Docker image
         run: docker push ${{ vars.DOCKER_REPOSITORY }}/${{ vars.ROBOT_BASE_IMAGE_NAME }}
+
+      - name: Authenticate to GHCR
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build the Docker image and push to GHCR
+        run: |
+               docker build --tag ${{ env.DOCKER_REGISTRY }}/${{ vars.DOCKER_REPOSITORY }}/${{ vars.ROBOT_BASE_IMAGE_NAME }}:latest builder/ubuntu
+               docker run ${{ env.DOCKER_REGISTRY }}/${{ vars.DOCKER_REPOSITORY }}/${{ vars.ROBOT_BASE_IMAGE_NAME }}:latest
+               docker push ${{ env.DOCKER_REGISTRY }}/${{ vars.DOCKER_REPOSITORY }}/${{ vars.ROBOT_BASE_IMAGE_NAME }}:latest
