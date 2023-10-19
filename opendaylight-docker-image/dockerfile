@@ -1,0 +1,61 @@
+# Use the official Ubuntu image as the base image
+ARG BASE_IMAGE=ubuntu
+FROM ${BASE_IMAGE}:latest
+
+# Update the package list and install necessary packages
+ARG BASE_IMAGE=ubuntu
+RUN if [ "${BASE_IMAGE}" = "centos" ]; then \
+        cd /etc/yum.repos.d && \
+        sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* && \
+        sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-* && \
+        yum -y update && \
+        yum -y install wget unzip openssh-server openssh-clients java-17-openjdk java-17-openjdk-devel passwd sed; \
+    else \
+        apt-get update && apt-get install -y \
+        wget \
+        unzip \
+        openjdk-17-jdk \
+        openssh-server ; \
+    fi
+
+# Install SSH server, create a non-root user without a password
+ARG BASE_IMAGE=ubuntu
+RUN if [ "${BASE_IMAGE}" = "centos" ]; then \
+        ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N '' && \
+        mkdir /var/run/sshd && \
+        useradd -m -s /bin/bash user && \
+        passwd -d user && \
+        sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config && \
+        rm /run/nologin; \
+    else \
+        mkdir /var/run/sshd && \
+        useradd -m -s /bin/bash user && \
+        passwd -d user && \
+        sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config; \
+    fi
+
+# Copy the entrypoint script into the container
+COPY entrypoint.sh /entrypoint.sh
+
+# Set the Karaf version as an environment variable
+ARG KARAF_VERSION=0.18.1
+ENV KARAF_VERSION=${KARAF_VERSION}
+RUN su - user -c "wget https://nexus.opendaylight.org/content/repositories/opendaylight.release/org/opendaylight/integration/karaf/${KARAF_VERSION}/karaf-${KARAF_VERSION}.zip \
+    && unzip /home/user/karaf-${KARAF_VERSION}.zip \
+    && chmod +x /home/user/karaf-${KARAF_VERSION}/bin/karaf \
+    && ssh-keygen -b 2048 -t rsa -f /tmp/sshkey -q -N '' "
+
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+ENV PATH=$PATH:/home/user/karaf-0.18.1/bin
+ENV KARAF_HOME=/home/user/karaf-0.18.1
+
+# Make the entrypoint script executable
+RUN chmod +x /entrypoint.sh
+
+# Expose the SSH and Karaf ports
+EXPOSE 22
+EXPOSE 8101
+EXPOSE 8181
+
+# Specify the entrypoint script as the default command
+ENTRYPOINT ["/entrypoint.sh"]
