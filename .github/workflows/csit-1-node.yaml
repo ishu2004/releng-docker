@@ -28,7 +28,7 @@
   
       steps:
         - name: Checkout repository
-          uses: actions/checkout@v2
+          uses: actions/checkout@v3
           # Checkout the code repository
   
         - name: Setup Jolokia for AAA
@@ -62,11 +62,7 @@
         
         - name: Delay for 30 seconds
           run: sleep 30
-          # Delay for 30 seconds
-        # - name: stop 
-        #   run: docker stop odl-container 
-        # - name: start
-        #   run: docker start odl-container
+
         - name: Run Test
           run: |
             # Define test_suite variable based on the matrix
