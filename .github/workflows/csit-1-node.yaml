@@ -4,7 +4,7 @@
   on:
     push:
       branches:
-        - main
+        - '*'
   
   jobs:
     csit:
@@ -39,29 +39,14 @@
             'echo "org.jolokia.authMode=basic" >> /home/user/karaf-0.18.1/etc/org.jolokia.osgi.cfg && \
             echo "org.jolokia.user=admin" >> /home/user/karaf-0.18.1/etc/org.jolokia.osgi.cfg && \
             echo "org.jolokia.password=admin" >> /home/user/karaf-0.18.1/etc/org.jolokia.osgi.cfg'
-        - name: Setup SSH
-          run: |
-            # Set up SSH in the container
-            docker exec odl-container bash -c "mkdir -p /home/user/.ssh && touch /home/user/.ssh/authorized_keys"
-        - name: Start robot container
-          run: |
-            # Start the robot container
-            docker run -d --network container:odl-container --name robot ${{ vars.DOCKER_REPOSITORY }}/${{ vars.ROBOT_IMAGE }} tail -f /dev/null
-        - name: Extract id_rsa.pub from the robot container
-          id: extract_pubkey
-          run: |
-            # Extract the id_rsa.pub from the robot container
-            docker exec robot cat /root/.ssh/id_rsa.pub > id_rsa.pub
-          continue-on-error: true
-  
-        - name: Add public key to opendaylight container
-          run: |
-            # Add the public key to the OpenDaylight container
-            PUB_KEY=$(cat id_rsa.pub)
-            docker exec odl-container bash -c "mkdir -p /home/user/.ssh && echo \"$PUB_KEY\" >> /home/user/.ssh/authorized_keys"
-        
+   
+        - name: Robot Setup    
+          uses: ./.github/action/ssh-setup-action
+          with: 
+            docker_repository: ${{ vars.DOCKER_REPOSITORY }}
+            robot_image: ${{ vars.ROBOT_IMAGE }}
         - name: Delay for 30 seconds
-          run: sleep 30
+          run: sleep 10
 
         - name: Run Test
           run: |

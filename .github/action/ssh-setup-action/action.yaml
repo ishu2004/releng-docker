@@ -1,0 +1,38 @@
+name: "ssh-setup"
+inputs:
+  docker_repository:
+    description: "Docker repository name"
+    required: true
+  robot_image:
+    description: "Robot image name"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup SSH
+      run: |
+        # Set up SSH in the container
+        docker exec odl-container bash -c "mkdir -p /home/user/.ssh && touch /home/user/.ssh/authorized_keys"
+      shell: bash
+
+    - name: Start robot container
+      run: |
+        # Start the robot container
+        docker run -d --network container:odl-container --name robot ${{ inputs.docker_repository }}/${{ inputs.robot_image }} tail -f /dev/null
+      shell: bash
+
+    - name: Extract id_rsa.pub from the robot container
+      id: extract_pubkey
+      run: |
+        # Extract the id_rsa.pub from the robot container
+        docker exec robot cat /root/.ssh/id_rsa.pub > id_rsa.pub
+      continue-on-error: true
+      shell: bash
+
+    - name: Add public key to opendaylight container
+      run: |
+        # Add the public key to the OpenDaylight container
+        PUB_KEY=$(cat id_rsa.pub)
+        docker exec odl-container bash -c "mkdir -p /home/user/.ssh && echo \"$PUB_KEY\" >> /home/user/.ssh/authorized_keys"
+      shell: bash
