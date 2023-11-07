@@ -45,7 +45,7 @@
           with: 
             docker_repository: ${{ vars.DOCKER_REPOSITORY }}
             robot_image: ${{ vars.ROBOT_IMAGE }}
-        - name: Delay for 30 seconds
+        - name: Delay for 10 seconds
           run: sleep 10
 
         - name: Run Test
