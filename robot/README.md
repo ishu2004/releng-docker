@@ -43,7 +43,7 @@ You can now access the container using
 Step 4: Run the OpenDaylight container on the same network.
 
 ```
-docker run -d --name opendaylight --network=host opendaylight-image --env FEATURES=odl-restconf,odl-netconf-topology
+docker run -d --name opendaylight --network=host  --env FEATURES=odl-restconf,odl-netconf-topology opendaylight_image_name
 ```
 
 Step 5: Clone the integration-test repository
