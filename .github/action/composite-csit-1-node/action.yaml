@@ -3,7 +3,12 @@ inputs:
   project_name:
     description: "repository name"
     required: true
-
+  DOCKER_REPOSITORY:
+    description: "image repository name"
+    required: true
+  ROBOT_IMAGE:
+    description: "image name"
+    required: true
 runs:
   using: "composite"
   steps:
@@ -23,8 +28,8 @@ runs:
     - name: Robot Setup
       uses: ayushishu/releng-docker/.github/action/ssh-setup-action@ayush
       with:
-        docker_repository: ${{ vars.DOCKER_REPOSITORY }}
-        robot_image: ${{ vars.ROBOT_IMAGE }}
+        docker_repository: ${{ input.DOCKER_REPOSITORY }}
+        robot_image: ${{ input.ROBOT_IMAGE }}
 
     - name: Delay for 10 seconds
       run: sleep 10
