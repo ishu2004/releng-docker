@@ -30,3 +30,4 @@ runs:
             --variable ODL_SYSTEM_1_IP:opendaylight \
             -v IS_KARAF_APPL:True \
             $robot_test_file"
+      shell: bash
