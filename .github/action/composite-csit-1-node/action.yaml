@@ -36,6 +36,6 @@ runs:
       run: sleep 10
       shell: bash
     - name: Run Test
-      uses: ayushishu/releng-docker/.github/action/robot-test-action@ayush
+      uses: ishu2004/releng-docker/.github/action/robot-test-action@main
       with:
         test_suite: ${{ inputs.project_name }}
