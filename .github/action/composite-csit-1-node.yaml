@@ -1,0 +1,35 @@
+name: CSIT-1-Node-Test-Composed
+inputs:
+  project_name:
+    description: "repository name"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      # Checkout the code repository
+
+    - name: Setup Jolokia for AAA
+      if: ${{ inputs.project_name }} == 'aaa'
+      run: |
+        # Configure Jolokia for the 'aaa' test suite
+        docker exec -i odl-container bash -c \
+          'echo "org.jolokia.authMode=basic" >> /home/user/karaf-0.18.1/etc/org.jolokia.osgi.cfg && \
+          echo "org.jolokia.user=admin" >> /home/user/karaf-0.18.1/etc/org.jolokia.osgi.cfg && \
+          echo "org.jolokia.password=admin" >> /home/user/karaf-0.18.1/etc/org.jolokia.osgi.cfg'
+
+    - name: Robot Setup
+      uses: ayushishu/releng-docker/.github/action/ssh-setup-action@ayush
+      with:
+        docker_repository: ${{ vars.DOCKER_REPOSITORY }}
+        robot_image: ${{ vars.ROBOT_IMAGE }}
+
+    - name: Delay for 10 seconds
+      run: sleep 10
+
+    - name: Run Test
+      uses: ayushishu/releng-docker/.github/action/robot-test-action@ayush
+      with:
+        test_suite: ${{ inputs.project_name }}
