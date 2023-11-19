@@ -16,7 +16,7 @@ Begin by cloning this repository to your local machine:
 
 ```
 git clone https://github.com/askb/releng-docker
-cd robot-framework-docker
+cd robot
 ```
 
 Step 2: Build the Docker Image
