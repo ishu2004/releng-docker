@@ -15,8 +15,8 @@ runs:
           robot_test_file="./010-special-export.robot 020-import-basic.robot 030-export-basic.robot 040-export-inclusions.robot"
         elif [ "${test_suite}" == "distribution" ]; then
           robot_test_file="karaf_sequence_install.robot karaf_stop.robot size.robot"
-        elif [ "${test_suite}" == "bgpcep-bgp-ingest-mixed-all" ]; then
-          robot_test_file="bgpcep/bgpingest/singlepeer_prefixcount.robot bgpcep/bgpingest/singlepeer_changecount.robot"          
+        elif [ "${test_suite}" == "bgpcep" ]; then
+          robot_test_file="bgpingest/singlepeer_prefixcount.robot bgpingest/singlepeer_changecount.robot"          
         elif [ "${test_suite}" == "aaa" ]; then
           robot_test_file="authn"
         fi
