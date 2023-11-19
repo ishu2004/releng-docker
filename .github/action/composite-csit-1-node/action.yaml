@@ -9,6 +9,7 @@ inputs:
   ROBOT_IMAGE:
     description: "image name"
     required: true
+
 runs:
   using: "composite"
   steps:
@@ -17,7 +18,7 @@ runs:
       # Checkout the code repository
 
     - name: Setup Jolokia for AAA
-      if: ${{ inputs.project_name }} == 'aaa'
+      if: ${{ inputs.project_name == 'aaa' }}
       run: |
         # Configure Jolokia for the 'aaa' test suite
         docker exec -i odl-container bash -c \
@@ -28,8 +29,8 @@ runs:
     - name: Robot Setup
       uses: ayushishu/releng-docker/.github/action/ssh-setup-action@ayush
       with:
-        docker_repository: ${{ input.DOCKER_REPOSITORY }}
-        robot_image: ${{ input.ROBOT_IMAGE }}
+        docker_repository: ${{ inputs.DOCKER_REPOSITORY }}
+        robot_image: ${{ inputs.ROBOT_IMAGE }}
 
     - name: Delay for 10 seconds
       run: sleep 10
